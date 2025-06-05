@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamDecor</title>
+  <link rel="stylesheet" href="src/css/costume.css">
+  <link rel="icon" href="src/images/decor-icon.png">
+</head>
+<body>
+  <div class="canvas-container">
+    <div class="canvas-wrapper">
+      <canvas id="avatarCanvas" width="600" height="400"></canvas>
+    </div>
+    <div class="save">
+      <button id="saveAvatar">
+        <h1>Salvar Decoração</h1>
+      </button>
+    </div>
+  </div>
+
+  <div class="layers-panel" id="layersPanel">
+    <div class="panel-header">
+      <span class="panel-title">Camadas</span>
+      <button class="toggle-btn" id="togglePanel">▼</button>
+    </div>
+    <div class="panel-content" id="panelContent">
+      <div id="layersList"></div>
+    </div>
+  </div>
+
+  <div class="bottom-carousel-container">
+    <div class="tabs-container" id="tabsContainer">
+      <div class="tabs-header">
+        <span class="tabs-title">Categorias</span>
+        <button class="toggle-btn" id="toggleTabs">▼</button>
+      </div>
+      <div class="tabs-content">
+        <div class="tabs">
+          <div class="tab active" data-category="moveis">Móveis</div>
+          <div class="tab" data-category="eletrodomesticos">Eletrodomésticos</div>
+          <div class="tab" data-category="decoracao">Decoração</div>
+          <div class="tab" data-category="iluminacao">Iluminação</div>
+          <div class="tab" data-category="plantas">Plantas</div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-wrapper">
+      <div class="arrow left-arrow" id="prevArrow">←</div>
+      <div class="carousel" id="carousel"></div>
+      <div class="arrow right-arrow" id="nextArrow">→</div>
+    </div>
+  </div>
+
+  <script src="src/js/costume.js"></script>
+</body>
+</html>
