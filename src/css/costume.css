@@ -40,9 +40,10 @@ body {
 }
 
 .canvas-wrapper {
-  position: relative;
-  width: 900px;
-  height: 600px;
+  border: 3px solid #66cdaa; 
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #avatarCanvas {

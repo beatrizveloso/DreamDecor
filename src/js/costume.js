@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
   const tabs = document.querySelectorAll(".tab");
   const tabsContainer = document.getElementById("tabsContainer");
   const toggleTabsBtn = document.getElementById("toggleTabs");
-  const tabsContent = document.querySelector(".tabs-content");
 
   canvas.width = 1000;
   canvas.height = 800;
@@ -29,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
   let tabsCollapsed = false;
   let currentIndex = 0;
   let dragStartX, dragStartY;
+  let initialX, initialY;
   let initialWidth, initialHeight;
   let initialAngle = 0;
   let initialMouseAngle = 0;
@@ -433,9 +433,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const clickedAccessory = getAccessoryAtPosition(offsetX, offsetY);
     if (clickedAccessory) {
       const control = detectControl(offsetX, offsetY, clickedAccessory);
-      if (control) {
-        selectedAccessory = clickedAccessory;
-        
+      selectedAccessory = clickedAccessory;
+      
+      if (control) {                
         if (control.type === "rotate") {
           rotating = true;
           dragStartX = offsetX;
@@ -461,42 +461,29 @@ document.addEventListener("DOMContentLoaded", function() {
           dragStartY = offsetY;
           initialWidth = selectedAccessory.width;
           initialHeight = selectedAccessory.height;
+          initialX = selectedAccessory.x;
+          initialY = selectedAccessory.y;
         }
-        
-        drawCharacterAndAccessories();
-        return;
+      } else {
+        isDragging = true;
+        dragStartX = offsetX;
+        dragStartY = offsetY;
+        initialX = selectedAccessory.x;
+        initialY = selectedAccessory.y;
       }
-    }
-    
-    selectedAccessory = clickedAccessory;
-    if (selectedAccessory) {
-      isDragging = true;
-      dragStartX = offsetX;
-      dragStartY = offsetY;
-      const initialX = selectedAccessory.x;
-      const initialY = selectedAccessory.y;
       
-      canvas.addEventListener("mousemove", function moveHandler(e) {
-        if (!isDragging) {
-          canvas.removeEventListener("mousemove", moveHandler);
-          return;
-        }
-        
-        const rect = canvas.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-        
-        selectedAccessory.x = initialX + (offsetX - dragStartX);
-        selectedAccessory.y = initialY + (offsetY - dragStartY);
-        drawCharacterAndAccessories();
-      });
+      drawCharacterAndAccessories();
+      return;
     }
     
+    selectedAccessory = null;
     drawCharacterAndAccessories();
     updateLayersPanel();
   }
 
   function handleCanvasMouseMove(event) {
+    if (!isDragging && !rotating && !skewing) return;
+    
     const rect = canvas.getBoundingClientRect();
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
@@ -507,12 +494,8 @@ document.addEventListener("DOMContentLoaded", function() {
       
       const newMouseAngle = Math.atan2(offsetY - centerY, offsetX - centerX) * 180 / Math.PI;
       selectedAccessory.angle = initialAngle + (newMouseAngle - initialMouseAngle);
-      
-      drawCharacterAndAccessories();
-      return;
     }
-    
-    if (skewing && selectedAccessory) {
+    else if (skewing && selectedAccessory) {
       const centerX = selectedAccessory.x + selectedAccessory.width / 2;
       const centerY = selectedAccessory.y + selectedAccessory.height / 2;
       
@@ -531,90 +514,90 @@ document.addEventListener("DOMContentLoaded", function() {
       } else {
         selectedAccessory.skewY = initialSkewY + (localX - startLocalX) / 100;
       }
-      
-      drawCharacterAndAccessories();
-      return;
+    }
+    else if (isDragging && selectedAccessory) {
+      if (resizing) {
+        const centerX = initialX + initialWidth / 2;
+        const centerY = initialY + initialHeight / 2;
+        
+        const angle = -selectedAccessory.angle * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        
+        const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
+        const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
+        
+        const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
+        const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
+        
+        let newWidth = initialWidth;
+        let newHeight = initialHeight;
+        let deltaX = 0;
+        let deltaY = 0;
+
+        switch(resizing) {
+          case "nw": 
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaX = (localX - startLocalX);
+            deltaY = (localY - startLocalY);
+            break;
+          case "ne": 
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaY = (localY - startLocalY);
+            break;
+          case "sw":
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            deltaX = (localX - startLocalX);
+            break;
+          case "se": 
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "n":
+            newHeight = initialHeight - (localY - startLocalY) * 2;
+            deltaY = (localY - startLocalY);
+            break;
+          case "e":
+            newWidth = initialWidth + (localX - startLocalX) * 2;
+            break;
+          case "s": 
+            newHeight = initialHeight + (localY - startLocalY) * 2;
+            break;
+          case "w": 
+            newWidth = initialWidth - (localX - startLocalX) * 2;
+            deltaX = (localX - startLocalX);
+            break;
+        }
+        
+        newWidth = Math.max(30, Math.min(800, newWidth));
+        newHeight = Math.max(30, Math.min(800, newHeight));
+        
+        if (event.shiftKey) {
+          const aspect = initialWidth / initialHeight;
+          if (resizing.includes("w") || resizing.includes("e")) {
+            newHeight = newWidth / aspect;
+          } else {
+            newWidth = newHeight * aspect;
+          }
+        }
+        
+        selectedAccessory.width = newWidth;
+        selectedAccessory.height = newHeight;
+        
+        if (resizing.includes("n") || resizing.includes("w")) {
+          selectedAccessory.x = initialX + deltaX;
+          selectedAccessory.y = initialY + deltaY;
+        }
+      } else {
+        selectedAccessory.x = initialX + (offsetX - dragStartX);
+        selectedAccessory.y = initialY + (offsetY - dragStartY);
+      }
     }
     
-    if (isDragging && selectedAccessory && resizing) {
-      const centerX = selectedAccessory.x + selectedAccessory.width / 2;
-      const centerY = selectedAccessory.y + selectedAccessory.height / 2;
-      
-      const angle = -selectedAccessory.angle * Math.PI / 180;
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      
-      const localX = (offsetX - centerX) * cos - (offsetY - centerY) * sin;
-      const localY = (offsetX - centerX) * sin + (offsetY - centerY) * cos;
-      
-      const startLocalX = (dragStartX - centerX) * cos - (dragStartY - centerY) * sin;
-      const startLocalY = (dragStartX - centerX) * sin + (dragStartY - centerY) * cos;
-      
-      let newWidth = initialWidth;
-      let newHeight = initialHeight;
-      let deltaX = 0;
-      let deltaY = 0;
-
-      switch(resizing) {
-        case "nw": 
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaX = (localX - startLocalX);
-          deltaY = (localY - startLocalY);
-          break;
-        case "ne": 
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaY = (localY - startLocalY);
-          break;
-        case "sw":
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          deltaX = (localX - startLocalX);
-          break;
-        case "se": 
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          break;
-        case "n":
-          newHeight = initialHeight - (localY - startLocalY) * 2;
-          deltaY = (localY - startLocalY);
-          break;
-        case "e":
-          newWidth = initialWidth + (localX - startLocalX) * 2;
-          break;
-        case "s": 
-          newHeight = initialHeight + (localY - startLocalY) * 2;
-          break;
-        case "w": 
-          newWidth = initialWidth - (localX - startLocalX) * 2;
-          deltaX = (localX - startLocalX);
-          break;
-      }
-      
-      newWidth = Math.max(30, Math.min(800, newWidth));
-      newHeight = Math.max(30, Math.min(800, newHeight));
-      
-      if (event.shiftKey) {
-        const aspect = initialWidth / initialHeight;
-        if (resizing.includes("w") || resizing.includes("e")) {
-          newHeight = newWidth / aspect;
-        } else {
-          newWidth = newHeight * aspect;
-        }
-      }
-      
-      const widthRatio = newWidth / selectedAccessory.width;
-      const heightRatio = newHeight / selectedAccessory.height;
-      
-      selectedAccessory.x = centerX - (centerX - selectedAccessory.x) * widthRatio;
-      selectedAccessory.y = centerY - (centerY - selectedAccessory.y) * heightRatio;
-      
-      selectedAccessory.width = newWidth;
-      selectedAccessory.height = newHeight;
-      
-      drawCharacterAndAccessories();
-    }
+    drawCharacterAndAccessories();
   }
 
   function handleCanvasMouseUp() {
@@ -662,7 +645,6 @@ document.addEventListener("DOMContentLoaded", function() {
     link.click();
   });
 
-  // Itens atualizados para categorias temáticas de decoração
   const items = {
     moveis: Array.from({ length: 50 }, (_, i) => `src/images/moveis/movel${i + 1}.png`),
     eletrodomesticos: Array.from({ length: 50 }, (_, i) => `src/images/eletrodomesticos/eletro${i + 1}.png`),
