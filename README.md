@@ -17,5 +17,6 @@ Neste jogo, você pode:
 - Canvas para montagem dos elementos
 
 ## 📷 Captura de Tela
+![image](https://github.com/user-attachments/assets/b982b653-3444-4252-866f-04cc6173efe0)
 
 
