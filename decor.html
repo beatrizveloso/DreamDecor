@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DecorDream</title>
+    <link rel="stylesheet" href="src/css/decor.css">
+    <link rel="icon" href="src/images/decor-icon.png">
+</head>
+
+<body>
+  <div class="text">
+    <div class="one">
+      <img src="http://www.gigaglitters.com/created/O6pjoOQg8P.gif" width="460" height="90" alt="" />
+    </div>
+    <div class="two">
+      <img src="http://www.gigaglitters.com/created/ZAS6smCtIR.gif" width="270" height="90" alt="" />
+    </div>
+  </div>
+
+  <div class="categories-page" id="categories-page">
+    <div class="categories">
+      <button class="category-btn" data-category="sala">Sala de Estar</button>
+      <button class="category-btn" data-category="cozinha">Cozinha</button>
+      <button class="category-btn" data-category="arlivre">Ar Livre</button>
+    </div>
+  </div>
+
+  <div class="carousel-page" id="carousel-page">
+    <button class="back-button" id="back-button">
+      &#8592; Voltar
+    </button>
+    <h2 class="category-title" id="category-title"></h2>
+    
+    <div class="carousel">
+      <div class="carousel-track" id="carousel-track"></div>
+      <div class="carousel-controls">
+        <button class="carousel-button" id="prev">&#8249;</button>
+        <button class="carousel-button" id="next">&#8250;</button>
+      </div>
+    </div>
+
+    <div class="botao">
+      <button id="confirmar-btn">
+        <span class="btn-text">
+          <h1>Confirmar</h1>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div id="custom-alert">
+    <div class="alert-box">
+      <h2>Escolha um cenário primeiro!</h2>
+      <button onclick="closeCustomAlert()">Ok</button>
+    </div>
+  </div>
+
+  <script src="src/js/decor.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DreamDecor</title>
+    <link rel="icon" href="src/images/decor-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-image: url('src/images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatBackground 8s infinite alternate linear;
+            position: relative;
+        }
+
+        @keyframes floatBackground {
+            0% {
+                background-position: center;
+            }
+
+            100% {
+                background-position: center top -20px;
+            }
+        }
+
+        .home-container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border: 4px solid #763D89;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 5px 5px 0 #763D89;
+            position: absolute;
+            top: 400px;
+        }
+
+        .start-button {
+            font-size: 24px;
+            background: #fcc3b0;
+            border: 3px solid #763D89;
+            border-radius: 20px;
+            padding: 15px 30px;
+            color: #763D89;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        .start-button:hover {
+            transform: scale(1.05);
+            background: #ffb9a1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #FFE0F1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #EFA289;
+            border-radius: 10px;
+            border: 2px solid #FFE0F1;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background-image: url('src/images/background-mobile.png');
+                animation: none;
+            }
+
+            .start-button {
+                margin-top: 10px;
+
+            }
+
+            .home-container {
+                width: 400px;
+                padding: 20px;
+                top: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="home-container">
+        <a href="decor.html" class="start-button">Começar</a>
+    </div>
+</body>
+
+</html>
