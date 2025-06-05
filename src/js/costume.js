@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", function() {
   const togglePanelBtn = document.getElementById("togglePanel");
   const saveButton = document.getElementById("saveAvatar");
   const tabs = document.querySelectorAll(".tab");
+  const tabsContainer = document.getElementById("tabsContainer");
+  const toggleTabsBtn = document.getElementById("toggleTabs");
+  const tabsContent = document.querySelector(".tabs-content");
+
+  canvas.width = 1000;
+  canvas.height = 800;
 
   const selectedCharacter = localStorage.getItem('selectedCharacter');
   let characterImage = null;
@@ -20,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
   let skewing = false;
   let skewAxis = null;
   let panelCollapsed = false;
+  let tabsCollapsed = false;
   let currentIndex = 0;
   let dragStartX, dragStartY;
   let initialWidth, initialHeight;
@@ -32,9 +39,14 @@ document.addEventListener("DOMContentLoaded", function() {
   const ROTATION_HANDLE_DISTANCE = 25;
   const SKEW_HANDLE_DISTANCE = 20;
 
+  const SELECTION_COLOR = "rgba(102, 205, 170, 0.8)";
+  const HANDLE_COLOR = "rgba(127, 255, 212, 0.8)";
+  const ROTATION_LINE_COLOR = "rgba(64, 224, 208, 0.8)";
+  const SKEW_LINE_COLOR = "rgba(72, 209, 204, 0.8)";
+
   function checkArrowsVisibility() {
-    prevArrow.style.visibility = carousel.scrollTop > 0 ? 'visible' : 'hidden';
-    nextArrow.style.visibility = carousel.scrollTop < carousel.scrollHeight - carousel.clientHeight ? 'visible' : 'hidden';
+    prevArrow.style.visibility = carousel.scrollLeft > 0 ? 'visible' : 'hidden';
+    nextArrow.style.visibility = carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth ? 'visible' : 'hidden';
   }
 
   carousel.addEventListener("scroll", checkArrowsVisibility);
@@ -42,28 +54,50 @@ document.addEventListener("DOMContentLoaded", function() {
   carousel.addEventListener("wheel", (event) => {
     event.preventDefault();
     carousel.scrollBy({
-      top: event.deltaY,
+      left: event.deltaY,
       behavior: "smooth"
     });
     setTimeout(checkArrowsVisibility, 100);
   });
 
   let isDraggingCarousel = false;
-  let startY;
-  let scrollTop;
+  let startX;
+  let scrollLeft;
+
+  carousel.addEventListener('mousedown', (e) => {
+    isDraggingCarousel = true;
+    startX = e.pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
+  });
+
+  carousel.addEventListener('mousemove', (e) => {
+    if (!isDraggingCarousel) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 2;
+    carousel.scrollLeft = scrollLeft - walk;
+  });
+
+  carousel.addEventListener('mouseup', () => {
+    isDraggingCarousel = false;
+  });
+
+  carousel.addEventListener('mouseleave', () => {
+    isDraggingCarousel = false;
+  });
 
   carousel.addEventListener('touchstart', (e) => {
     isDraggingCarousel = true;
-    startY = e.touches[0].pageY - carousel.offsetTop;
-    scrollTop = carousel.scrollTop;
+    startX = e.touches[0].pageX - carousel.offsetLeft;
+    scrollLeft = carousel.scrollLeft;
   });
 
   carousel.addEventListener('touchmove', (e) => {
     if (!isDraggingCarousel) return;
     e.preventDefault();
-    const y = e.touches[0].pageY - carousel.offsetTop;
-    const walk = (y - startY) * 2;
-    carousel.scrollTop = scrollTop - walk;
+    const x = e.touches[0].pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 2;
+    carousel.scrollLeft = scrollLeft - walk;
   });
 
   carousel.addEventListener('touchend', () => {
@@ -73,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   prevArrow.addEventListener("click", () => {
     carousel.scrollBy({
-      top: -carousel.clientHeight,
+      left: -carousel.clientWidth,
       behavior: 'smooth'
     });
     setTimeout(checkArrowsVisibility, 100);
@@ -81,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   nextArrow.addEventListener("click", () => {
     carousel.scrollBy({
-      top: carousel.clientHeight,
+      left: carousel.clientWidth,
       behavior: 'smooth'
     });
     setTimeout(checkArrowsVisibility, 100);
@@ -94,12 +128,19 @@ document.addEventListener("DOMContentLoaded", function() {
     togglePanelBtn.textContent = panelCollapsed ? '►' : '▼';
   });
 
+  toggleTabsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tabsCollapsed = !tabsCollapsed;
+    tabsContainer.classList.toggle('collapsed', tabsCollapsed);
+    toggleTabsBtn.textContent = tabsCollapsed ? '►' : '▼';
+  });
+
   function updateLayersPanel() {
     layersList.innerHTML = '';
     
     const characterLayer = document.createElement('div');
     characterLayer.className = 'layer-item';
-    characterLayer.textContent = 'Personagem Base';
+    characterLayer.textContent = 'Cenário Base';
     characterLayer.addEventListener('click', () => {
       selectedAccessory = null;
       drawCharacterAndAccessories();
@@ -171,11 +212,11 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function getCategoryFromImageSrc(src) {
-    if (src.includes('cabelos')) return 'Cabelo';
-    if (src.includes('oculos')) return 'Óculos';
-    if (src.includes('colares') || src.includes('brinco')) return 'Colar/Brinco';
-    if (src.includes('chapeus')) return 'Chapéu';
-    if (src.includes('adds') || src.includes('bolsa')) return 'Acessório';
+    if (src.includes('moveis')) return 'Móvel';
+    if (src.includes('eletrodomesticos')) return 'Eletrodoméstico';
+    if (src.includes('decoracao')) return 'Decoração';
+    if (src.includes('iluminacao')) return 'Iluminação';
+    if (src.includes('plantas')) return 'Planta';
     return 'Item';
   }
 
@@ -211,11 +252,11 @@ document.addEventListener("DOMContentLoaded", function() {
       ctx.drawImage(img, -width / 2, -height / 2, width, height);
       
       if (selectedAccessory && selectedAccessory.img === img) {
-        ctx.strokeStyle = "rgba(148, 1, 104, 0.8)";
+        ctx.strokeStyle = SELECTION_COLOR;
         ctx.lineWidth = 2;
         ctx.strokeRect(-width / 2, -height / 2, width, height);
         
-        ctx.fillStyle = "rgba(143, 28, 85, 0.8)";
+        ctx.fillStyle = HANDLE_COLOR;
         
         const cornerHandles = [
           { x: -width/2, y: -height/2, type: 'resize', corner: 'nw' }, 
@@ -243,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.beginPath();
         ctx.moveTo(0, -height/2);
         ctx.lineTo(0, rotationHandleY);
-        ctx.strokeStyle = "rgba(212, 68, 153, 0.8)";
+        ctx.strokeStyle = ROTATION_LINE_COLOR;
         ctx.lineWidth = 2;
         ctx.stroke();
         
@@ -253,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function() {
           ctx.translate(centerX, centerY);
           ctx.rotate(angle * Math.PI / 180);
           
-          ctx.fillStyle = "rgba(68, 212, 153, 0.8)";
+          ctx.fillStyle = SKEW_LINE_COLOR;
           ctx.beginPath();
           ctx.arc(width/2 + SKEW_HANDLE_DISTANCE, 0, HANDLE_SIZE, 0, Math.PI * 2);
           ctx.fill();
@@ -267,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function() {
           ctx.lineTo(width/2 + SKEW_HANDLE_DISTANCE, 0);
           ctx.moveTo(0, -height/2);
           ctx.lineTo(0, -height/2 - SKEW_HANDLE_DISTANCE);
-          ctx.strokeStyle = "rgba(68, 212, 153, 0.8)";
+          ctx.strokeStyle = SKEW_LINE_COLOR;
           ctx.stroke();
         }
       }
@@ -368,7 +409,6 @@ document.addEventListener("DOMContentLoaded", function() {
       return { type: "rotate" };
     }
     if (Math.abs(acc.skewX || 0) > 0.1 || Math.abs(acc.skewY || 0) > 0.1) {
-      // Skew horizontal
       const skewHDx = localX - (acc.width/2 + SKEW_HANDLE_DISTANCE);
       const skewHDy = localY - 0;
       if (Math.sqrt(skewHDx * skewHDx + skewHDy * skewHDy) <= HANDLE_SIZE) {
@@ -618,30 +658,31 @@ document.addEventListener("DOMContentLoaded", function() {
   saveButton.addEventListener("click", () => {
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = "macho.png";
+    link.download = "dreamdecor.png";
     link.click();
   });
 
+  // Itens atualizados para categorias temáticas de decoração
   const items = {
-    cabelos: Array.from({ length: 50 }, (_, i) => `src/images/cabelos/cabelo${i + 1}.png`),
-    oculos: Array.from({ length: 50 }, (_, i) => `src/images/oculos/oculos${i + 1}.png`),
-    colares: [
-      ...Array.from({ length: 40 }, (_, i) => `src/images/colares/colar${i + 1}.png`),
-      ...Array.from({ length: 11 }, (_, i) => `src/images/colares/brinco${i + 1}.png`)
+    moveis: Array.from({ length: 50 }, (_, i) => `src/images/moveis/movel${i + 1}.png`),
+    eletrodomesticos: Array.from({ length: 50 }, (_, i) => `src/images/eletrodomesticos/eletro${i + 1}.png`),
+    decoracao: [
+      ...Array.from({ length: 40 }, (_, i) => `src/images/decoracao/decor${i + 1}.png`),
+      ...Array.from({ length: 11 }, (_, i) => `src/images/decoracao/quadro${i + 1}.png`)
     ],
-    chapeus: [
-      ...Array.from({ length: 50 }, (_, i) => `src/images/chapeus/chapeu${i + 1}.png`)
+    iluminacao: [
+      ...Array.from({ length: 50 }, (_, i) => `src/images/iluminacao/luminaria${i + 1}.png`)
     ],
-    add: [
-      ...Array.from({ length: 31 }, (_, i) => `src/images/adds/add${i + 1}.png`),
-      ...Array.from({ length: 10 }, (_, i) => `src/images/adds/bolsa${i + 1}.png`)
+    plantas: [
+      ...Array.from({ length: 31 }, (_, i) => `src/images/plantas/planta${i + 1}.png`),
+      ...Array.from({ length: 10 }, (_, i) => `src/images/plantas/vaso${i + 1}.png`)
     ]
   };
 
   function renderItems(category) {
     carousel.innerHTML = items[category].map(imageSrc => `
       <div class="carousel-item">
-        <img src="${imageSrc}" alt="Acessório" onclick="addAccessory('${imageSrc}')">
+        <img src="${imageSrc}" alt="${category}" onclick="addAccessory('${imageSrc}')">
       </div>
     `).join('');
     checkArrowsVisibility();
@@ -664,7 +705,7 @@ document.addEventListener("DOMContentLoaded", function() {
   if (selectedCharacter) {
     setCharacter(selectedCharacter);
   } else {
-    alert('Nenhum personagem foi selecionado!');
+    alert('Nenhum cenário foi selecionado!');
   }
 
   updateTabs();

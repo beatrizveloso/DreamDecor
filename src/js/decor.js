@@ -106,7 +106,7 @@
         showCustomAlert();
       } else {
         localStorage.setItem('selectedCharacter', selectedCharacter);
-        window.location.href = 'monte seu avatar.html';
+        window.location.href = 'costume.html';
       }
     });
 
