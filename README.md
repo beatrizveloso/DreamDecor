@@ -1,8 +1,8 @@
-# 🎀 Dream Decor 
+# 🪑 Dream Decor 
 
 **Dream Decor** é um jogo fofo e colorido onde você pode soltar sua criatividade personalizando cenários com móveis, personagens e itens decorativos! Ideal para quem ama design, organização e mundos encantados, o jogo oferece uma experiência relaxante e cheia de possibilidades.
 
-## ✨ Sobre o Jogo
+## 🖼️ Sobre o Jogo
 
 Neste jogo, você pode:
 - Escolher entre diferentes cenários fofinhos 🌸
