@@ -639,21 +639,20 @@ function addAccessory(imageSrc) {
   });
 
   const items = {
-    moveis: Array.from({ length: 30 }, (_, i) => `src/images/moveis/movel${i + 1}.png`),
-    eletrodomesticos: Array.from({ length: 30 }, (_, i) => `src/images/eletrodomesticos/eletro${i + 1}.png`),
+    moveis: Array.from({ length: 50 }, (_, i) => `src/images/moveis/movel-${i + 1}.png`),
+    eletrodomesticos: Array.from({ length: 30 }, (_, i) => `src/images/eletrodomesticos/eletro-${i + 1}.png`),
     decoracao: [
-      ...Array.from({ length: 20 }, (_, i) => `src/images/decoracao/decor${i + 1}.png`),
-      ...Array.from({ length: 10 }, (_, i) => `src/images/decoracao/quadro${i + 1}.png`)
+      ...Array.from({ length: 20 }, (_, i) => `src/images/decoracao/decor-${i + 1}.png`),
+      ...Array.from({ length: 10 }, (_, i) => `src/images/decoracao/quadro-${i + 1}.png`)
     ],
     personagens: [
-      ...Array.from({ length: 30 }, (_, i) => `src/images/personagens/personagem1${i + 1}.png`)
+      ...Array.from({ length: 30 }, (_, i) => `src/images/personagens/personagem-${i + 1}.png`)
     ],
     iluminacao: [
-      ...Array.from({ length: 30 }, (_, i) => `src/images/iluminacao/luminaria${i + 1}.png`)
+      ...Array.from({ length: 20 }, (_, i) => `src/images/iluminacao/luminaria-${i + 1}.png`)
     ],
     plantas: [
-      ...Array.from({ length: 20 }, (_, i) => `src/images/plantas/planta${i + 1}.png`),
-      ...Array.from({ length: 10 }, (_, i) => `src/images/plantas/vaso${i + 1}.png`)
+      ...Array.from({ length: 20 }, (_, i) => `src/images/plantas/planta-${i + 1}.png`)
     ]
   };
 
