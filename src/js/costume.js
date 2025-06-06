@@ -215,130 +215,123 @@ document.addEventListener("DOMContentLoaded", function() {
     if (src.includes('moveis')) return 'Móvel';
     if (src.includes('eletrodomesticos')) return 'Eletrodoméstico';
     if (src.includes('decoracao')) return 'Decoração';
+    if (src.includes('personagens')) return 'Personagens';
     if (src.includes('iluminacao')) return 'Iluminação';
     if (src.includes('plantas')) return 'Planta';
     return 'Item';
   }
 
   function drawCharacterAndAccessories() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (characterImage) {
-      const scale = Math.min(
-        canvas.width / characterImage.width,
-        canvas.height / characterImage.height
-      );
-      const newWidth = characterImage.width * scale;
-      const newHeight = characterImage.height * scale;
+  if (characterImage) {
+    // Desenha a imagem do cenário no tamanho original, sem scaling
+    ctx.drawImage(characterImage, 0, 0, canvas.width, canvas.height);
+  }
 
-      ctx.drawImage(
-        characterImage,
-        (canvas.width - newWidth) / 2,
-        (canvas.height - newHeight) / 2,
-        newWidth,
-        newHeight
-      );
-    }
-
-    accessoryImages.forEach(({ img, x, y, width, height, angle = 0, skewX = 0, skewY = 0 }) => {
-      ctx.save();
-      const centerX = x + width / 2;
-      const centerY = y + height / 2;
+  // Desenha todos os acessórios
+  accessoryImages.forEach(({ img, x, y, width, height, angle = 0, skewX = 0, skewY = 0 }) => {
+    ctx.save();
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.transform(1, skewY, skewX, 1, 0, 0);
+    
+    ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    
+    if (selectedAccessory && selectedAccessory.img === img) {
+      ctx.strokeStyle = SELECTION_COLOR;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-width / 2, -height / 2, width, height);
       
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angle * Math.PI / 180);
-      ctx.transform(1, skewY, skewX, 1, 0, 0);
+      ctx.fillStyle = HANDLE_COLOR;
       
-      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+      const cornerHandles = [
+        { x: -width/2, y: -height/2, type: 'resize', corner: 'nw' }, 
+        { x: width/2, y: -height/2, type: 'resize', corner: 'ne' },    
+        { x: -width/2, y: height/2, type: 'resize', corner: 'sw' },    
+        { x: width/2, y: height/2, type: 'resize', corner: 'se' },    
+        
+        { x: 0, y: -height/2, type: 'resize', corner: 'n' },          
+        { x: width/2, y: 0, type: 'resize', corner: 'e' },           
+        { x: 0, y: height/2, type: 'resize', corner: 's' },      
+        { x: -width/2, y: 0, type: 'resize', corner: 'w' },           
+      ];
       
-      if (selectedAccessory && selectedAccessory.img === img) {
-        ctx.strokeStyle = SELECTION_COLOR;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-width / 2, -height / 2, width, height);
-        
-        ctx.fillStyle = HANDLE_COLOR;
-        
-        const cornerHandles = [
-          { x: -width/2, y: -height/2, type: 'resize', corner: 'nw' }, 
-          { x: width/2, y: -height/2, type: 'resize', corner: 'ne' },    
-          { x: -width/2, y: height/2, type: 'resize', corner: 'sw' },    
-          { x: width/2, y: height/2, type: 'resize', corner: 'se' },    
-          
-          { x: 0, y: -height/2, type: 'resize', corner: 'n' },          
-          { x: width/2, y: 0, type: 'resize', corner: 'e' },           
-          { x: 0, y: height/2, type: 'resize', corner: 's' },      
-          { x: -width/2, y: 0, type: 'resize', corner: 'w' },           
-        ];
-        
-        cornerHandles.forEach(({x, y}) => {
-          ctx.beginPath();
-          ctx.arc(x, y, HANDLE_SIZE, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        
-        const rotationHandleY = -height/2 - ROTATION_HANDLE_DISTANCE;
+      cornerHandles.forEach(({x, y}) => {
         ctx.beginPath();
-        ctx.arc(0, rotationHandleY, HANDLE_SIZE, 0, Math.PI * 2);
+        ctx.arc(x, y, HANDLE_SIZE, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      const rotationHandleY = -height/2 - ROTATION_HANDLE_DISTANCE;
+      ctx.beginPath();
+      ctx.arc(0, rotationHandleY, HANDLE_SIZE, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(0, -height/2);
+      ctx.lineTo(0, rotationHandleY);
+      ctx.strokeStyle = ROTATION_LINE_COLOR;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      if (Math.abs(skewX) > 0.1 || Math.abs(skewY) > 0.1) {
+        ctx.restore();
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle * Math.PI / 180);
+        
+        ctx.fillStyle = SKEW_LINE_COLOR;
+        ctx.beginPath();
+        ctx.arc(width/2 + SKEW_HANDLE_DISTANCE, 0, HANDLE_SIZE, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.beginPath();
-        ctx.moveTo(0, -height/2);
-        ctx.lineTo(0, rotationHandleY);
-        ctx.strokeStyle = ROTATION_LINE_COLOR;
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.arc(0, -height/2 - SKEW_HANDLE_DISTANCE, HANDLE_SIZE, 0, Math.PI * 2);
+        ctx.fill();
         
-        if (Math.abs(skewX) > 0.1 || Math.abs(skewY) > 0.1) {
-          ctx.restore();
-          ctx.save();
-          ctx.translate(centerX, centerY);
-          ctx.rotate(angle * Math.PI / 180);
-          
-          ctx.fillStyle = SKEW_LINE_COLOR;
-          ctx.beginPath();
-          ctx.arc(width/2 + SKEW_HANDLE_DISTANCE, 0, HANDLE_SIZE, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.beginPath();
-          ctx.arc(0, -height/2 - SKEW_HANDLE_DISTANCE, HANDLE_SIZE, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.beginPath();
-          ctx.moveTo(width/2, 0);
-          ctx.lineTo(width/2 + SKEW_HANDLE_DISTANCE, 0);
-          ctx.moveTo(0, -height/2);
-          ctx.lineTo(0, -height/2 - SKEW_HANDLE_DISTANCE);
-          ctx.strokeStyle = SKEW_LINE_COLOR;
-          ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.moveTo(width/2, 0);
+        ctx.lineTo(width/2 + SKEW_HANDLE_DISTANCE, 0);
+        ctx.moveTo(0, -height/2);
+        ctx.lineTo(0, -height/2 - SKEW_HANDLE_DISTANCE);
+        ctx.strokeStyle = SKEW_LINE_COLOR;
+        ctx.stroke();
       }
-      ctx.restore();
-    });
-  }
+    }
+    ctx.restore();
+  });
+}
   
-  function setCharacter(imageSrc) {
-    characterImage = new Image();
-    characterImage.src = imageSrc;
-    characterImage.onload = () => {
-      drawCharacterAndAccessories();
-      updateLayersPanel();
+function setCharacter(imageSrc) {
+  characterImage = new Image();
+  characterImage.src = imageSrc;
+  characterImage.onload = () => {
+    canvas.width = characterImage.width;
+    canvas.height = characterImage.height;
+    
+    drawCharacterAndAccessories();
+    updateLayersPanel();
+  };
+}
+  
+function addAccessory(imageSrc) {
+  const img = new Image();
+  img.src = imageSrc;
+  img.onload = () => {
+    const newAccessory = {
+      img,
+      x: (canvas.width - 100) / 2, 
+      y: (canvas.height - 100) / 2,
+      width: 100,
+      height: 100,
+      angle: 0,
+      skewX: 0,
+      skewY: 0
     };
-  }
-  
-  function addAccessory(imageSrc) {
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-      const newAccessory = {
-        img,
-        x: (canvas.width - 100) / 2,
-        y: (canvas.height - 100) / 2,
-        width: 100,
-        height: 100,
-        angle: 0,
-        skewX: 0,
-        skewY: 0
-      };
       accessoryImages.push(newAccessory);
       selectedAccessory = newAccessory;
       drawCharacterAndAccessories();
@@ -646,17 +639,20 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   const items = {
-    moveis: Array.from({ length: 50 }, (_, i) => `src/images/moveis/movel${i + 1}.png`),
-    eletrodomesticos: Array.from({ length: 50 }, (_, i) => `src/images/eletrodomesticos/eletro${i + 1}.png`),
+    moveis: Array.from({ length: 30 }, (_, i) => `src/images/moveis/movel${i + 1}.png`),
+    eletrodomesticos: Array.from({ length: 30 }, (_, i) => `src/images/eletrodomesticos/eletro${i + 1}.png`),
     decoracao: [
-      ...Array.from({ length: 40 }, (_, i) => `src/images/decoracao/decor${i + 1}.png`),
-      ...Array.from({ length: 11 }, (_, i) => `src/images/decoracao/quadro${i + 1}.png`)
+      ...Array.from({ length: 20 }, (_, i) => `src/images/decoracao/decor${i + 1}.png`),
+      ...Array.from({ length: 10 }, (_, i) => `src/images/decoracao/quadro${i + 1}.png`)
+    ],
+    personagens: [
+      ...Array.from({ length: 30 }, (_, i) => `src/images/personagens/personagem1${i + 1}.png`)
     ],
     iluminacao: [
-      ...Array.from({ length: 50 }, (_, i) => `src/images/iluminacao/luminaria${i + 1}.png`)
+      ...Array.from({ length: 30 }, (_, i) => `src/images/iluminacao/luminaria${i + 1}.png`)
     ],
     plantas: [
-      ...Array.from({ length: 31 }, (_, i) => `src/images/plantas/planta${i + 1}.png`),
+      ...Array.from({ length: 20 }, (_, i) => `src/images/plantas/planta${i + 1}.png`),
       ...Array.from({ length: 10 }, (_, i) => `src/images/plantas/vaso${i + 1}.png`)
     ]
   };
