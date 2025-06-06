@@ -44,12 +44,14 @@ body {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Adicione estas linhas: */
+  width: fit-content; /* Ajusta o wrapper ao conteúdo */
+  height: fit-content;
 }
 
 #avatarCanvas {
   background-color: #f8fdfe;
-  width: 100%;
-  height: 100%;
+  /* Remova width e height 100% e defina um tamanho fixo ou ajuste via JS */
   display: block;
 }
 
@@ -58,9 +60,9 @@ body {
 }
 
 .save button {
-  width: 180px;
-  height: 60px;
-  border-radius: 15px;
+  width: 120px;
+  height: 260px;
+  border-radius: 80px;
   background: linear-gradient(#4db6ac, #00897b);
   border: none;
   color: white;
