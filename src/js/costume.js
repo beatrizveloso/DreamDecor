@@ -646,7 +646,7 @@ function addAccessory(imageSrc) {
       ...Array.from({ length: 10 }, (_, i) => `src/images/decoracao/quadro-${i + 1}.png`)
     ],
     personagens: [
-      ...Array.from({ length: 30 }, (_, i) => `src/images/personagens/personagem-${i + 1}.png`)
+      ...Array.from({ length: 50 }, (_, i) => `src/images/personagens/personagem-${i + 1}.png`)
     ],
     iluminacao: [
       ...Array.from({ length: 20 }, (_, i) => `src/images/iluminacao/luminaria-${i + 1}.png`)
